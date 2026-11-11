@@ -1,110 +1,231 @@
-# OralTrainer (`oraltrainer-4ssa6-g11`)
+# 🎙️ OralTrainer — Plateforme d'entraînement et d'évaluation de l'expression orale (FR / EN)
 
-Plateforme d'entraînement et de simulation d'épreuves orales basée sur une architecture **Microservices** (Spring Boot / Java 17), offrant enregistrement audio, transcription, analyse linguistique/acoustique, retours pédagogiques personnalisés et suivi de progression.
+> **Module MT-41 · Applications Web Distribuées** — Mini-projet 2026-2027
+> Version 1.0 · novembre 2026
+
+Application web distribuée, basée sur une architecture **microservices (Spring Boot / Spring Cloud)**, qui fait parler l'apprenant, analyse sa prise de parole et le prépare aux certifications officielles en **français** et en **anglais**, du niveau **B1 au C2** (CECRL).
 
 ---
 
-## 1. Présentation générale
+## 📋 Informations du projet
+
+| | |
+|---|---|
+| **Classe / groupe** | _4SSA6 Grp 1_ |
+| **Dépôt Git** | https://github.com/Baha268/oraltrainer-4ssa6-g11 |
+| **Enseignante** | _Mme Rim Douss_ |
+
+### Équipe
+
+| Membre | Nom et prénom | Microservice responsable |
+|---|---|---|
+| Étudiant 1 | _Med Hedi Guidara_ | `notification-service` |
+| Étudiant 2 | _Beha Eddine Cherif_ | `content-service` |
+| Étudiant 3 | _Ala Salem_ | `recording-service` |
+| Étudiant 4 | _Yessmine Aissa Larousse_ | `simulation-service` |
+| Étudiant 5 | _Feriel Dridi_ | `feedback-service` |
+| Étudiant 6 | _Ahmed Chaabeni_ | `progress-service` |
+| Tout le groupe | — | `analysis-service` (microservice commun, MongoDB) |
+
+---
+
+## 1. Présentation
 
 ### Problématique
-La préparation aux examens oraux, soutenances et entretiens professionnels manque souvent de rétroaction objective, régulière et personnalisée sur le débit de parole, la fluidité, la gestion du temps et la qualité linguistique.
+L'oral est la compétence la plus déterminante aux examens de langue, mais la moins entraînée : peu de temps de parole en classe, presque aucun retour hors de la classe.
 
-### Objectifs
-- Proposer des parcours et exercices pédagogiques structurés par niveau et thématique.
-- Simuler des épreuves orales chronométrées avec questions de relance.
-- Capturer les enregistrements vocaux, générer leurs transcriptions et en extraire des métriques linguistiques et acoustiques.
-- Produire des retours pédagogiques exploitables, des tableaux de bord de progression et des attestations.
-- Garantir une architecture modulaire, scalable et documentée via **OpenAPI 3 / Swagger UI**.
+> Comment permettre à un apprenant de s'entraîner à l'oral aussi souvent qu'il le souhaite, avec un retour **immédiat, objectif et aligné sur le CECRL**, tout en laissant au formateur le dernier mot sur l'évaluation ?
 
----
+### Idée générale
+- **Pratique illimitée** : le temps de parole ne dépend plus de la taille du groupe ni du formateur.
+- **Feedback immédiat et argumenté** : corrections, reformulations, exercices ciblés.
+- **Simulations fidèles** aux épreuves officielles : préparation chronométrée, sujet tiré au sort, relances d'un examinateur virtuel, note estimée sur la grille du niveau visé.
+- **Le formateur garde la main** : il réécoute, ajuste la note automatique et commente.
 
-## 2. Stack technique
+### Acteurs
 
-| Couche | Technologies (Cible architecturale) | État actuel du dépôt |
-| :--- | :--- | :--- |
-| **Langage & Build** | Java 17 (`JDK 17`), Apache Maven (`3.9.x`) | Configuré (Java `17.0.14`, Maven `3.9.16`) |
-| **Back-end Microservices** | Spring Boot `3.3.5`, Spring Web, Springdoc OpenAPI (`2.6.0`) | Initialisé pour les 8 services métier (MVC sans BDD) |
-| **Infrastructure Microservices** | Spring Cloud Gateway, Netflix Eureka Server | Dossiers réservés (`api-gateway`, `eureka-server`) |
-| **Sécurité & IAM** | Keycloak (OAuth2 / OpenID Connect) | Prévu dans l'architecture cible |
-| **Bases de données** | Architecture *Database-per-Service* (PostgreSQL / MongoDB) | Non connectées à cette étape (couche MVC sans BDD) |
-| **Conteneurisation** | Docker & Docker Compose | Prévu pour l'orchestration des services |
-| **Front-end** | Application Web cliente (`Frontend/web/`) | Dossier réservé |
+| Acteur | Rôle |
+|---|---|
+| **Apprenant** (`LEARNER`) | S'enregistrer, recevoir un feedback, passer des épreuves blanches, suivre sa progression |
+| **Formateur** (`TRAINER`) | Suivre ses groupes, valider/ajuster les évaluations, gérer les sujets |
+| **Établissement** (`INSTITUTION`) | Piloter plusieurs classes, indicateurs agrégés, attestations internes |
+| **Administrateur** (`ADMIN`) | Gérer le catalogue, relancer une analyse, supprimer des données (RGPD) |
+| **Moteur vocal** (système) | Outil externe de transcription et d'analyse prosodique |
 
----
+### Critères d'évaluation de chaque prise de parole
 
-## 3. Cartographie des microservices et ports
+| Critère | Calculé par |
+|---|---|
+| Prononciation, Fluidité, Intonation | `analysis-service` (signal audio) |
+| Lexique, Grammaire, Cohérence | `feedback-service` (texte transcrit) |
 
-> [!NOTE]
-> À l'étape actuelle d'initialisation, les 8 microservices métier exposent chacun un endpoint de santé `GET /api/<service>/hello` et leur documentation Swagger/OpenAPI sans base de données. Les colonnes *Base de données prévue* et *Infrastructure* reflètent la conception cible.
-
-| Service | Rôle & Responsabilités | Base de données prévue | Port | Statut | Membre responsable (Branche Git) |
-| :--- | :--- | :--- | :---: | :--- | :--- |
-| `notification-service` | Notifications et alertes utilisateurs | PostgreSQL (`notification_db`) | `8088` | Initialisé (Hello + Swagger) | Med Hedi Guidara (`Med-Hedi-guidara`) |
-| `content-service` | Référentiel pédagogique, cours, modules et exercices | PostgreSQL (`content_db`) | `8082` | Initialisé (Hello + Swagger) | Beha Eddine Cherif (`Sherif-Bahaeddine`) |
-| `recording-service` | Enregistrements audio et transcriptions | MongoDB / Stockage objet | `8083` | Initialisé (Hello + Swagger) | Ala Salem (`Salem_Ala`) |
-| `simulation-service` | Épreuves blanches chronométrées et relances | PostgreSQL (`simulation_db`) | `8084` | Initialisé (Hello + Swagger) | Yessmine Aissa Larousse (`Yessmine_Aissa_Larousse`) |
-| `feedback-service` | Génération des retours pédagogiques et recommandations | MongoDB (`feedback_db`) | `8085` | Initialisé (Hello + Swagger) | Feriel Dridi (`Dridi-Feriel`) |
-| `progress-service` | Suivi de progression, tableaux de bord et attestations | PostgreSQL (`progress_db`) | `8086` | Initialisé (Hello + Swagger) | Ahmed Chaabeni (`Ahmed-Chaabeni`) |
-| `user-service` | Gestion des utilisateurs, profils, rôles et groupes | PostgreSQL (`user_db`) | `8081` | Initialisé (Hello + Swagger) | À attribuer |
-| `analysis-service` | Analyse linguistique et acoustique des enregistrements | MongoDB (`analysis_db`) | `8087` | Initialisé (Hello + Swagger) | À attribuer |
-| `api-gateway` | Point d'entrée unique, routage et filtrage sécurité | N/A | `8080` *(cible)* | Dossier initialisé | Infrastructure |
-| `eureka-server` | Registre de découverte de services | N/A | `8761` *(cible)* | Dossier initialisé | Infrastructure |
-| `speech-engine` | Moteur de traitement vocal / ASR | N/A | — | Dossier initialisé | Core / IA |
-| `events-contract` | Contrats d'événements partagés | N/A | — | Dossier initialisé | Transverse |
+**Certifications visées :** DELF/DALF, TCF, Cambridge (B1 Preliminary → C2 Proficiency), IELTS, TOEFL. Les sujets officiels servent de modèles de format et ne sont **pas reproduits**.
 
 ---
 
-## 4. Arborescence du dépôt
+## 2. Architecture
 
-```text
+Le front-end n'appelle **que l'API Gateway**. Chaque microservice possède **sa propre base** et s'enregistre dans **Eureka**. Le `user-service` est un service commun au groupe, intégré avec Keycloak.
+- Échanges **synchrones** : HTTP via **OpenFeign** (réponse immédiate nécessaire).
+- Échanges **asynchrones** : **RabbitMQ** (traitement audio long, ou plusieurs services concernés par le même événement).
+
+```
+ Angular (keycloak-js)
+        │
+        ▼
+ API Gateway :8080 ──── Keycloak :8180 (JWT)
+        │
+        ├──► user-service        :8081  (H2 — service commun, lié à Keycloak)
+        ├──► content-service     :8082  (H2)
+        ├──► recording-service   :8083  (H2)  ──► speech-engine (HTTP)
+        ├──► simulation-service  :8084  (MySQL)
+        ├──► feedback-service    :8085  (MySQL)
+        ├──► progress-service    :8086  (MySQL)
+        ├──► analysis-service    :8087  (MongoDB) ──► speech-engine (HTTP)
+        └──► notification-service :8088  (MySQL)
+
+ Eureka Server :8761      RabbitMQ :5672 (console :15672) — exchange topic « oral.events »
+```
+
+### Composants d'infrastructure
+
+| Composant | Technologie | Port | Rôle |
+|---|---|---|---|
+| API Gateway | Spring Cloud Gateway | 8080 | Point d'entrée unique, routage `lb://`, validation JWT, CORS |
+| Registre | Eureka Server | 8761 | Découverte des services |
+| Sécurité | Keycloak | 8180 | Realm `oral-platform`, Authorization Code + PKCE, rôles `LEARNER`, `TRAINER`, `INSTITUTION`, `ADMIN` |
+| Broker | RabbitMQ | 5672 / 15672 | Événements (exchange topic `oral.events`) |
+| Moteur vocal | Conteneur `speech-engine` | — | `/transcribe` et `/analyze` en HTTP (mode simulé prévu en secours) |
+| Conteneurisation | Docker / Docker Compose | — | Un Dockerfile par service + `docker-compose.yml` global |
+
+### Sécurité
+- Authentification via **Keycloak** (JWT) ; le champ `sub` est stocké dans `User.keycloakId`.
+- Validation du jeton à la Gateway → **401** si absent/invalide.
+- Autorisation par méthode (`@PreAuthorize`) dans chaque service → **403** si rôle insuffisant. Un apprenant ne lit que ses propres données.
+- OpenFeign propage le jeton ; pour les traitements déclenchés par événement, un **compte de service** Keycloak (client credentials) est utilisé.
+
+### Routage de la Gateway
+
+| Préfixes | Service cible |
+|---|---|
+| `/api/users/**`, `/api/establishments/**`, `/api/groups/**` | `USER-SERVICE` (service commun) |
+| `/api/notifications/**` | `NOTIFICATION-SERVICE` |
+| `/api/certifications/**`, `/api/subjects/**`, `/api/grids/**`, `/api/paths/**`, `/api/exercises/**` | `CONTENT-SERVICE` |
+| `/api/recordings/**` | `RECORDING-SERVICE` |
+| `/api/simulations/**` | `SIMULATION-SERVICE` |
+| `/api/feedbacks/**`, `/api/recommendations/**` | `FEEDBACK-SERVICE` |
+| `/api/progress/**`, `/api/alerts/**`, `/api/attestations/**` | `PROGRESS-SERVICE` |
+| `/api/analyses/**` | `ANALYSIS-SERVICE` |
+
+---
+
+## 3. Technologies
+
+| Domaine | Technologie |
+|---|---|
+| Microservices | Spring Boot (Java 17+), Spring Web, Spring Data JPA |
+| Documentation API | Swagger / OpenAPI (springdoc) — `/swagger-ui.html` sur chaque service |
+| Gateway / Découverte | Spring Cloud Gateway, Eureka (Spring Cloud Netflix) |
+| Communication | OpenFeign (sync), RabbitMQ / Spring AMQP (async — choix à confirmer en séance 7, Kafka en alternative) |
+| Sécurité | Keycloak, OAuth2 / OpenID Connect, JWT |
+| Bases de données | H2, MySQL, MongoDB |
+| Conteneurisation | Docker, Docker Compose |
+| Front-end | Angular, keycloak-js |
+| Moteur vocal | Whisper ou Vosk (transcription) ; Praat/Parselmouth (prosodie) |
+| Gestion de projet | Git / GitHub, GitHub Projects |
+
+---
+
+## 4. Les microservices
+
+| MS | Service | Responsable | Port | Base | Responsabilités |
+|---|---|---|---|---|---|
+| 1 | `user-service` | Groupe (commun) | 8081 | H2 | Gestion commune des utilisateurs et intégration avec Keycloak |
+| 2 | `content-service` | Étudiant 1 | 8082 | H2 | Certifications, banque de sujets, grilles CECRL, parcours, exercices |
+| 3 | `recording-service` | Étudiant 2 | 8083 | H2 | Upload/stockage audio, transcription, événement `RecordingTranscribed` |
+| 4 | `simulation-service` | Étudiant 3 | 8084 | MySQL | Épreuves blanches en 3 étapes, relances, note estimée |
+| 5 | `feedback-service` | Étudiant 4 | 8085 | MySQL | Corrections grammaire/lexique/cohérence, recommandations, validation formateur |
+| 6 | `progress-service` | Étudiant 5 | 8086 | MySQL | Progression, niveau estimé, tableau de bord, alertes, attestations |
+| 7 | `notification-service` | Étudiant 6 | 8088 | MySQL | Création et gestion des notifications destinées aux apprenants et formateurs |
+| 8 | `analysis-service` | Groupe | 8087 | MongoDB | Analyse acoustique (prononciation, fluidité, intonation, pauses, courbe de hauteur) |
+
+### Principes de découpage
+- Un service = une responsabilité métier = **une base** (aucune base partagée).
+- **Pas de jointure entre services** : seuls les identifiants (`userId`, `recordingId`, …) sont stockés.
+- **Aucune dépendance circulaire** : `user-service` (service commun) et `content-service` sont des services de référence qui n'appellent personne.
+- Le calcul est séparé de la restitution (analysis → audio, feedback → texte, progress → agrégation).
+
+### Choix des bases
+
+| Base | Services | Justification |
+|---|---|---|
+| H2 | user, content, recording | Données de référence / métadonnées, schéma simple |
+| MySQL | simulation, feedback, progress, notification | Données relationnelles et transactionnelles, historique et gestion des notifications |
+| MongoDB | analysis | Résultat d'analyse = document à structure variable, lu en un bloc |
+
+---
+
+## 5. Communications entre services
+
+### Synchrones (OpenFeign)
+
+| Appelant | Appelé | Endpoint | Objet |
+|---|---|---|---|
+| simulation-service | user-service | `GET /api/users/{id}/goal` | Niveau et certification visés |
+| simulation-service | content-service | `GET /api/subjects/random`, `GET /api/grids` | Sujet et grille |
+| feedback-service | recording-service | `GET /api/recordings/{id}/transcript` | Texte à corriger |
+| feedback-service | content-service | `GET /api/exercises`, `GET /api/grids` | Exercices et critères |
+| analysis-service | recording-service | `GET /api/recordings/{id}/audio` | Audio à analyser |
+| progress-service | user-service | `GET /api/users/{id}/goal`, `GET /api/groups/{id}/members` | Cible et membres |
+| progress-service | content-service | `GET /api/certifications/{id}` | Niveau requis |
+
+### Asynchrones (RabbitMQ)
+
+| Événement | Clé de routage | Producteur | Consommateurs |
+|---|---|---|---|
+| `RecordingTranscribed` | `recording.transcribed` | recording | analysis, simulation |
+| `AnalysisCompleted` | `analysis.completed` | analysis | feedback |
+| `FeedbackGenerated` | `feedback.generated` | feedback | progress, simulation |
+| `FeedbackValidated` | `feedback.validated` | feedback | progress, simulation |
+| `SimulationFinished` | `simulation.finished` | simulation | progress, notification |
+
+## 6. Conventions REST
+
+| Sujet | Convention |
+|---|---|
+| Format | JSON UTF-8, dates ISO 8601, préfixe `/api`, ressources au pluriel |
+| Pagination | `page` (à partir de 0) et `size` ; réponse : `content`, `page`, `size`, `totalElements` |
+| Succès | `200` lecture/màj · `201` création (en-tête `Location`) · `202` traitement async accepté · `204` suppression |
+| Erreurs | `400` · `401` · `403` · `404` · `409` (conflit d'état) · `413` · `415` · `503` |
+| Format d'erreur | RFC 7807 (`ProblemDetail`) : `type`, `title`, `status`, `detail`, `instance` |
+| Documentation | Swagger UI par service ; contrats OpenAPI exportés dans `Documentation/` |
+
+---
+
+## 7. Structure du dépôt
+
+```
 oraltrainer-4ssa6-g11/
 ├── Backend/
 │   ├── api-gateway/
 │   ├── eureka-server/
-│   ├── events-contract/
-│   ├── speech-engine/
-│   ├── user-service/            # Port 8081
-│   ├── content-service/         # Port 8082
-│   ├── recording-service/       # Port 8083
-│   ├── simulation-service/      # Port 8084
-│   ├── feedback-service/        # Port 8085
-│   ├── progress-service/        # Port 8086
-│   ├── analysis-service/        # Port 8087
-│   └── notification-service/    # Port 8088
+│   ├── user-service/           # service commun lié à Keycloak
+│   ├── content-service/
+│   ├── recording-service/
+│   ├── simulation-service/
+│   ├── feedback-service/
+│   ├── progress-service/
+│   ├── notification-service/
+│   ├── analysis-service/
+│   ├── events-contract/        # classes d'événements partagées
+│   ├── speech-engine/          # conteneur du moteur vocal
+│   └── docker-compose.yml
 ├── Frontend/
-│   └── web/                     # Application cliente web
+│   └── web/
 ├── Documentation/
-│   ├── Diagrams/                # Architecture, cas d'utilisation, classes, séquences
-│   └── Presentation/            # Supports de présentation
-├── .gitignore
+│   ├── Presentation/
+│   ├── Diagrams/
+│   ├── Document_Conception_Plateforme_Oral.docx
+│   └── Document_Conception_Plateforme_Oral_Groupe.docx
 └── README.md
 ```
-
----
-
-## 5. Organisation des branches Git
-
-Pour préserver la propreté du dépôt entre la phase de conception et les développements :
-
-- **`main`** : Branche protégée dédiée uniquement à la structure du projet, à la conception et à la documentation (aucun code source de développement non validé).
-- **`develop`** : Branche d'intégration regroupant les microservices fonctionnels et les tests validés.
-- **`feat/<nom-service-ou-fonctionnalite>`** : Branches de travail individuelles créées depuis `develop` (ex. `feat/user-service-hello`, `feat/content-crud`) et fusionnées via Pull Request après revue et passage des tests Maven.
-
----
-
-## 6. Vérification locale & Swagger UI
-
-Chaque microservice dans `Backend/` est un projet Maven autonome :
-
-```bash
-# Compiler et exécuter les tests d'un microservice (ex. user-service)
-mvn -f Backend/user-service/pom.xml clean test
-
-# Démarrer le microservice
-mvn -f Backend/user-service/pom.xml spring-boot:run
-```
-
-Une fois démarré (ex. sur le port `8081`) :
-- **Endpoint Hello** : `http://localhost:8081/api/user/hello`
-- **Spécification OpenAPI** : `http://localhost:8081/v3/api-docs`
-- **Swagger UI** : `http://localhost:8081/swagger-ui/index.html`
