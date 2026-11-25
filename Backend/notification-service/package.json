@@ -1,0 +1,28 @@
+{
+  "name": "notification-service",
+  "version": "2.0.0",
+  "description": "Service commun de notifications (Node.js / NestJS, MongoDB, RabbitMQ, WebSocket) - OralTrain",
+  "private": true,
+  "scripts": {
+    "build": "nest build",
+    "start": "nest start",
+    "start:dev": "nest start --watch",
+    "start:prod": "node dist/main",
+    "test": "node --test dist/hello.controller.js"
+  },
+  "dependencies": {
+    "@nestjs/common": "^10.4.7",
+    "@nestjs/core": "^10.4.7",
+    "@nestjs/platform-express": "^10.4.7",
+    "@nestjs/swagger": "^7.4.2",
+    "eureka-js-client": "^4.5.0",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.1"
+  },
+  "devDependencies": {
+    "@nestjs/cli": "^10.4.5",
+    "@types/express": "^4.17.21",
+    "@types/node": "^22.0.0",
+    "typescript": "^5.6.3"
+  }
+}

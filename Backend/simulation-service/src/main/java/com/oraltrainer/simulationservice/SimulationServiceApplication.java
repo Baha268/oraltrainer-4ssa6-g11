@@ -1,4 +1,4 @@
-﻿package com.oraltrainer.simulationservice;
+package com.oraltrainer.simulationservice;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

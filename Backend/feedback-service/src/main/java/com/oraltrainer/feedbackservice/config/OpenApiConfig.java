@@ -16,13 +16,13 @@ public class OpenApiConfig {
     public OpenAPI feedbackServiceOpenAPI() {
         return new OpenAPI()
                 .info(new Info()
-                        .title("OralTrainer - Feedback Service API")
-                        .version("1.0.0")
-                        .description("Microservice dédié à la génération des retours pédagogiques et des recommandations personnalisées. "
-                                + "Il consolide les résultats d'analyse pour produire des axes d'amélioration constructifs et des exercices ciblés.")
+                        .title("OralTrain - Feedback Service API")
+                        .version("2.0.0")
+                        .description("Production du retour pédagogique après l'analyse d'un enregistrement : corrections (grammaire, lexique, cohérence, reformulations), "
+                                + "scores CECRL par critère, recommandations et validation ou ajustement par le formateur.")
                         .contact(new Contact()
-                                .name("OralTrainer Team (G11)")
-                                .email("contact@oraltrainer.local")
+                                .name("OralTrain Team (4SSA6-G1)")
+                                .email("contact@oraltrain.local")
                                 .url("https://github.com/Baha268/oraltrainer-4ssa6-g11")))
                 .servers(List.of(
                         new Server()

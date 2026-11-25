@@ -16,13 +16,13 @@ public class OpenApiConfig {
     public OpenAPI simulationServiceOpenAPI() {
         return new OpenAPI()
                 .info(new Info()
-                        .title("OralTrainer - Simulation Service API")
-                        .version("1.0.0")
-                        .description("Microservice dédié à la gestion des épreuves blanches chronométrées et des relances interactives. "
-                                + "Il pilote le cycle de vie des sessions d'examen oral, les minuteries et l'enchaînement des questions de relance.")
+                        .title("OralTrain - Simulation Service API")
+                        .version("2.0.0")
+                        .description("Orchestration des examens blancs en trois étapes (PREPARATION, MONOLOGUE, INTERACTION), "
+                                + "gestion des relances de l'examinateur et calcul de la note estimée une fois les feedbacks reçus.")
                         .contact(new Contact()
-                                .name("OralTrainer Team (G11)")
-                                .email("contact@oraltrainer.local")
+                                .name("OralTrain Team (4SSA6-G1)")
+                                .email("contact@oraltrain.local")
                                 .url("https://github.com/Baha268/oraltrainer-4ssa6-g11")))
                 .servers(List.of(
                         new Server()

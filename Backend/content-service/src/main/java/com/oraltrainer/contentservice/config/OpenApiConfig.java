@@ -16,13 +16,13 @@ public class OpenApiConfig {
     public OpenAPI contentServiceOpenAPI() {
         return new OpenAPI()
                 .info(new Info()
-                        .title("OralTrainer - Content Service API")
-                        .version("1.0.0")
-                        .description("Microservice dédié à la gestion du référentiel pédagogique, des cours, des modules et des exercices d'entraînement oral. "
-                                + "Il structure les parcours d'apprentissage, les sujets d'examen et les ressources pédagogiques.")
+                        .title("OralTrain - Content Service API")
+                        .version("2.0.0")
+                        .description("Catalogue pédagogique central d'OralTrain (niveaux CECRL A1 à C2) : gestion des certifications, des sujets d'oral, "
+                                + "des grilles d'évaluation CECRL pondérées et des exercices réutilisables.")
                         .contact(new Contact()
-                                .name("OralTrainer Team (G11)")
-                                .email("contact@oraltrainer.local")
+                                .name("OralTrain Team (4SSA6-G1)")
+                                .email("contact@oraltrain.local")
                                 .url("https://github.com/Baha268/oraltrainer-4ssa6-g11")))
                 .servers(List.of(
                         new Server()

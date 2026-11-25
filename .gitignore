@@ -1,43 +1,26 @@
-# Compiled & Build outputs
-target/
+# Maven / Java build outputs
+**/target/
 *.class
-*.jar
 *.war
 *.nar
 *.ear
-out/
-build/
+!**/maven-wrapper.jar
 
-# IDE & Editor files
-.idea/
-*.iml
-.vscode/
-*.swp
-*.swo
-*~
+# Node.js / NestJS
+**/node_modules/
+**/dist/
 
-# Front-end dependencies & logs
-node_modules/
-dist/
+# Logs & crash dumps
 *.log
-npm-debug.log*
-yarn-debug.log*
-pnpm-debug.log*
-
-# OS & System temporary files
-.DS_Store
-Thumbs.db
-Desktop.ini
-
-# Environment & Secrets
-.env
-.env.local
-
-# BlueJ / J2ME / Archives / JVM Crash logs
-*.ctxt
-.mtj.tmp/
-*.zip
-*.tar.gz
-*.rar
 hs_err_pid*
 replay_pid*
+
+# IDEs & OS
+.idea/
+*.iws
+*.iml
+*.ipr
+.vscode/
+.DS_Store
+Thumbs.db
+.env

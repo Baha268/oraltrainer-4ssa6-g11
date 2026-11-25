@@ -32,8 +32,8 @@ class HelloControllerTest {
     void shouldExposeOpenApiDocsAndSwaggerUi() throws Exception {
         mockMvc.perform(get("/v3/api-docs"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.info.title").value("OralTrainer - User Service API"))
-                .andExpect(jsonPath("$.info.version").value("1.0.0"))
+                .andExpect(jsonPath("$.info.title").value("OralTrain - User Service API"))
+                .andExpect(jsonPath("$.info.version").value("2.0.0"))
                 .andExpect(jsonPath("$.info.description", containsString("utilisateurs")))
                 .andExpect(jsonPath("$.paths['/api/user/hello'].get").exists());
 

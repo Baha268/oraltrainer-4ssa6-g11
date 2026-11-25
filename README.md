@@ -1,9 +1,9 @@
-# 🎙️ OralTrainer — Plateforme d'entraînement et d'évaluation de l'expression orale (FR / EN)
+# 🎙️ OralTrain — Plateforme d'entraînement et d'évaluation de l'expression orale (FR / EN)
 
-> **Module MT-41 · Applications Web Distribuées** — Mini-projet 2026-2027
-> Version 1.0 · novembre 2026
+> **Module AWD · Applications Web Distribuées** — Mini-projet 2026-2027
+> **Version 2.0 · novembre 2026** (Nouvelle répartition validée)
 
-Application web distribuée, basée sur une architecture **microservices (Spring Boot / Spring Cloud)**, qui fait parler l'apprenant, analyse sa prise de parole et le prépare aux certifications officielles en **français** et en **anglais**, du niveau **B1 au C2** (CECRL).
+Application web distribuée, basée sur une architecture **microservices (Spring Boot / Spring Cloud + Node.js / NestJS)**, qui fait parler l'apprenant, analyse sa prise de parole et le prépare aux certifications officielles en **français** et en **anglais**, des niveaux **CECRL A1 à C2**.
 
 ---
 
@@ -11,220 +11,157 @@ Application web distribuée, basée sur une architecture **microservices (Spring
 
 | | |
 |---|---|
-| **Classe / groupe** | _4SSA6 Grp 1_ |
+| **Projet** | OralTrain |
+| **Classe / Équipe** | _4SSA6-G1_ |
 | **Dépôt Git** | https://github.com/Baha268/oraltrainer-4ssa6-g11 |
-| **Enseignante** | _Mme Rim Douss_ |
+| **Encadrante** | _Mme Rim Douss_ |
 
-### Équipe
+### Nouvelle répartition de l'équipe (v2)
 
-| Membre | Nom et prénom | Microservice responsable |
+| Membre | Nom et prénom | Microservice responsable | Port | Base | Statut |
+|---|---|---|---:|---|---|
+| Étudiant 1 | _Beha Eddine Cherif_ | `content-service` | `8082` | H2 | Inchangé |
+| Étudiant 2 | _Ala Salem_ | `recording-service` | `8083` | H2 + MongoDB (GridFS) | Élargi (+ analyse vocale) |
+| Étudiant 3 | _Yessmine Aissa Larousse_ | `simulation-service` | `8084` | MySQL | Inchangé |
+| Étudiant 4 | _Feriel Dridi_ | `feedback-service` | `8085` | MySQL | Inchangé |
+| Étudiant 5 | _Ahmed Chaabeni_ | `progress-service` | `8086` | MySQL | Renforcé (+ objectifs, reco) |
+| Étudiant 6 | _Med Hedi Guidara_ | `classroom-service` | `8089` | MySQL | Nouveau |
+| **Groupe** | _Équipe complète_ | `user-service` | `8081` | H2 | Commun (Keycloak) |
+| **Groupe** | _Équipe complète_ | `notification-service` | `8088` | MongoDB | Commun (**Node.js / NestJS**) |
+
+> **Évolutions majeures de la v2 :**
+> - **`analysis-service` supprimé** (port `8087` libéré) : l'analyse vocale (prononciation, fluidité, intonation, pauses, hauteur) est intégrée dans `recording-service` ; l'analyse linguistique reste dans `feedback-service`.
+> - **`classroom-service` (`:8089`) ajouté** (Med Hedi Guidara) : établissements, classes, inscriptions, parcours assignés, commentaires du formateur et tableaux de bord de classe/établissement.
+> - **Deux services communs** : `user-service` (`:8081`, Spring Boot) et `notification-service` (`:8088`, **Node.js / NestJS** + WebSocket + RabbitMQ).
+
+---
+
+## 1. Acteurs et rôles Keycloak
+
+| Acteur | Rôle Keycloak | Fonctionnalités principales |
 |---|---|---|
-| Étudiant 1 | _Med Hedi Guidara_ | `notification-service` |
-| Étudiant 2 | _Beha Eddine Cherif_ | `content-service` |
-| Étudiant 3 | _Ala Salem_ | `recording-service` |
-| Étudiant 4 | _Yessmine Aissa Larousse_ | `simulation-service` |
-| Étudiant 5 | _Feriel Dridi_ | `feedback-service` |
-| Étudiant 6 | _Ahmed Chaabeni_ | `progress-service` |
-| Tout le groupe | — | `analysis-service` (microservice commun, MongoDB) |
+| **Visiteur** | — *(public)* | Consulter la présentation de la plateforme et des certifications, créer un compte |
+| **Apprenant** | `APPRENANT` | S'entraîner sur un exercice, passer un examen blanc, consulter feedbacks, progression, objectifs et attestations, recevoir les notifications |
+| **Formateur** | `FORMATEUR` | Gérer ses classes, assigner des parcours, valider ou ajuster les feedbacks, commenter, recevoir les alertes, consulter le tableau de bord de classe |
+| **Admin établissement** | `ADMIN_ETABLISSEMENT` | Gérer l'établissement, ses classes et ses formateurs ; consulter le tableau de bord d'établissement |
+| **Admin plateforme** | `ADMIN` | Gérer le catalogue (certifications, sujets, grilles, exercices), les utilisateurs et les rôles ; suivre les traitements audio en échec |
 
 ---
 
-## 1. Présentation
+## 2. Architecture technique cible
 
-### Problématique
-L'oral est la compétence la plus déterminante aux examens de langue, mais la moins entraînée : peu de temps de parole en classe, presque aucun retour hors de la classe.
-
-> Comment permettre à un apprenant de s'entraîner à l'oral aussi souvent qu'il le souhaite, avec un retour **immédiat, objectif et aligné sur le CECRL**, tout en laissant au formateur le dernier mot sur l'évaluation ?
-
-### Idée générale
-- **Pratique illimitée** : le temps de parole ne dépend plus de la taille du groupe ni du formateur.
-- **Feedback immédiat et argumenté** : corrections, reformulations, exercices ciblés.
-- **Simulations fidèles** aux épreuves officielles : préparation chronométrée, sujet tiré au sort, relances d'un examinateur virtuel, note estimée sur la grille du niveau visé.
-- **Le formateur garde la main** : il réécoute, ajuste la note automatique et commente.
-
-### Acteurs
-
-| Acteur | Rôle |
-|---|---|
-| **Apprenant** (`LEARNER`) | S'enregistrer, recevoir un feedback, passer des épreuves blanches, suivre sa progression |
-| **Formateur** (`TRAINER`) | Suivre ses groupes, valider/ajuster les évaluations, gérer les sujets |
-| **Établissement** (`INSTITUTION`) | Piloter plusieurs classes, indicateurs agrégés, attestations internes |
-| **Administrateur** (`ADMIN`) | Gérer le catalogue, relancer une analyse, supprimer des données (RGPD) |
-| **Moteur vocal** (système) | Outil externe de transcription et d'analyse prosodique |
-
-### Critères d'évaluation de chaque prise de parole
-
-| Critère | Calculé par |
-|---|---|
-| Prononciation, Fluidité, Intonation | `analysis-service` (signal audio) |
-| Lexique, Grammaire, Cohérence | `feedback-service` (texte transcrit) |
-
-**Certifications visées :** DELF/DALF, TCF, Cambridge (B1 Preliminary → C2 Proficiency), IELTS, TOEFL. Les sujets officiels servent de modèles de format et ne sont **pas reproduits**.
-
----
-
-## 2. Architecture
-
-Le front-end n'appelle **que l'API Gateway**. Chaque microservice possède **sa propre base** et s'enregistre dans **Eureka**. Le `user-service` est un service commun au groupe, intégré avec Keycloak.
-- Échanges **synchrones** : HTTP via **OpenFeign** (réponse immédiate nécessaire).
-- Échanges **asynchrones** : **RabbitMQ** (traitement audio long, ou plusieurs services concernés par le même événement).
-
-```
- Angular (keycloak-js)
-        │
-        ▼
- API Gateway :8080 ──── Keycloak :8180 (JWT)
-        │
-        ├──► user-service        :8081  (H2 — service commun, lié à Keycloak)
-        ├──► content-service     :8082  (H2)
-        ├──► recording-service   :8083  (H2)  ──► speech-engine (HTTP)
-        ├──► simulation-service  :8084  (MySQL)
-        ├──► feedback-service    :8085  (MySQL)
-        ├──► progress-service    :8086  (MySQL)
-        ├──► analysis-service    :8087  (MongoDB) ──► speech-engine (HTTP)
-        └──► notification-service :8088  (MySQL)
-
- Eureka Server :8761      RabbitMQ :5672 (console :15672) — exchange topic « oral.events »
+```text
+                       Front-end web (SPA Angular)
+                    apprenant · formateur · administrateur
+                       │                        │
+            login OIDC │                        │ HTTPS / REST + JWT (+ WebSocket)
+                       ▼                        ▼
+                 Keycloak :8180 ◄────── API Gateway :8080 (local :8090)
+                       │                        │
+        Config Server :8888             Eureka Server :8761
+                       │                        │
+        ┌──────────────┴────────────────────────┴──────────────┐
+        ├──► user-service         :8081  (Spring Boot · H2)
+        ├──► content-service      :8082  (Spring Boot · H2)
+        ├──► recording-service    :8083  (Spring Boot · H2 + MongoDB GridFS) ──► speech-engine (HTTP)
+        ├──► simulation-service   :8084  (Spring Boot · MySQL)
+        ├──► feedback-service     :8085  (Spring Boot · MySQL)
+        ├──► progress-service     :8086  (Spring Boot · MySQL)
+        ├──► classroom-service    :8089  (Spring Boot · MySQL)
+        └──► notification-service :8088  (Node.js / NestJS · MongoDB)
+                       │
+                       ▼
+          RabbitMQ :5672 / :15672 — exchange topic « oral.events »
 ```
 
 ### Composants d'infrastructure
 
 | Composant | Technologie | Port | Rôle |
+|---|---|---:|---|
+| **API Gateway** | Spring Cloud Gateway | `8080` *(local `8090`)* | Point d'entrée unique, routage `lb://` via Eureka, validation JWT (JWKS Keycloak), CORS, relai WebSocket |
+| **Eureka Server** | Spring Cloud Netflix Eureka | `8761` | Annuaire d'enregistrement et de découverte des services |
+| **Config Server** | Spring Cloud Config | `8888` | Configuration centralisée chargée par chaque service au démarrage |
+| **Keycloak** | Keycloak | `8180` | Authentification OIDC, rôles, émission des JWT |
+| **RabbitMQ** | RabbitMQ | `5672` / `15672` | Bus d'événements asynchrone (exchange topic `oral.events` + DLQ) |
+| **speech-engine** | Whisper / Vosk + Praat / Parselmouth | HTTP | Transcription et analyse prosodique (appelé uniquement par `recording-service`) |
+
+---
+
+## 3. Responsabilités et entités des microservices
+
+| Service | Port | Base | Entités principales | Responsabilités clés |
+|---|---:|---|---|---|
+| `user-service` | `8081` | H2 | `Utilisateur`, `Role`, `CodeRole` | Profils métier, rôles Keycloak, unicité `keycloakId`/`email`, publie `user.registered` |
+| `content-service` | `8082` | H2 | `Certification`, `SujetOral`, `Exercice`, `GrilleEvaluation`, `CritereEvaluation` | Catalogue pédagogique CECRL (A1–C2), sujets, grilles pondérées (100 %), exercices par tags |
+| `recording-service` | `8083` | H2 + MongoDB | `Enregistrement`, `FichierAudio` (GridFS), `Transcription`, `AnalyseVocale`, `ScorePrononciation` | Stockage audio, transcription + analyse prosodique via `speech-engine`, relance (max 3) |
+| `simulation-service` | `8084` | MySQL | `Simulation`, `EtapeSimulation`, `RelanceExaminateur`, `NoteEstimee` | Examen blanc en 3 étapes (`PREPARATION`, `MONOLOGUE`, `INTERACTION`), relances, note estimée |
+| `feedback-service` | `8085` | MySQL | `Feedback`, `ScoreCritere`, `Correction`, `Recommandation` | Retour linguistique, scores CECRL par critère, recommandations, validation/ajustement formateur |
+| `progress-service` | `8086` | MySQL | `Progression`, `HistoriqueScore`, `Objectif`, `AlerteProgression`, `Attestation` | Carnet de suivi temporel, tendances, objectifs, alertes, attestations, reco d'exercices |
+| `notification-service` | `8088` | MongoDB | `EvenementTraite`, `Notification`, `ModeleMessage`, `PreferenceNotification` | **NestJS** : écoute tous les événements RabbitMQ (idempotent), notifications WebSocket et e-mail |
+| `classroom-service` | `8089` | MySQL | `Etablissement`, `Classe`, `Inscription`, `ParcoursAssigne`, `CommentaireFormateur` | Établissements, classes, inscriptions, parcours assignés, commentaires, dashboard agrégé |
+
+---
+
+## 4. Communications entre microservices
+
+### 4.1 Communications synchrones — REST / OpenFeign (+ Resilience4j)
+
+| Appelant | Appelé | Endpoint (exemple) | But |
 |---|---|---|---|
-| API Gateway | Spring Cloud Gateway | 8080 | Point d'entrée unique, routage `lb://`, validation JWT, CORS |
-| Registre | Eureka Server | 8761 | Découverte des services |
-| Sécurité | Keycloak | 8180 | Realm `oral-platform`, Authorization Code + PKCE, rôles `LEARNER`, `TRAINER`, `INSTITUTION`, `ADMIN` |
-| Broker | RabbitMQ | 5672 / 15672 | Événements (exchange topic `oral.events`) |
-| Moteur vocal | Conteneur `speech-engine` | — | `/transcribe` et `/analyze` en HTTP (mode simulé prévu en secours) |
-| Conteneurisation | Docker / Docker Compose | — | Un Dockerfile par service + `docker-compose.yml` global |
+| `simulation` | `content` | `GET /api/subjects/{id}` | Récupérer le sujet et la certification de l'épreuve |
+| `recording` | `simulation` | `GET /api/simulations/{id}/steps/{stepId}/status` | Vérifier que la simulation existe et que l'étape est active |
+| `recording` | `speech-engine` | `POST /transcribe`, `POST /analyse` | Transcription (Whisper/Vosk) et prosodie (Praat/Parselmouth) |
+| `feedback` | `recording` | `GET /api/recordings/{id}/transcription`, `/analysis` | Lire la transcription et les scores vocaux |
+| `feedback` | `content` | `GET /api/exercises/{id}`, `GET /api/rubrics/{id}` | Lire l'exercice et la grille CECRL |
+| `progress` | `content` | `GET /api/certifications/{id}`, `GET /api/exercises?tags=` | Niveau minimal d'attestation ; exercices à recommander |
+| `classroom` | `progress` | `GET /api/progress/summary?userIds=` | Indicateurs agrégés pour le tableau de bord de classe |
+| `classroom` | `content` | `GET /api/subjects/{id}` | Vérifier le sujet d'un parcours assigné |
+| `progress` | `classroom` | `GET /api/classes/by-learner/{userId}` | Retrouver le formateur de l'apprenant pour lui adresser une alerte |
+| `classroom` | `user` | `GET /api/users/{id}` | Formateur et membres d'une classe |
+| `notification` | `user` | `GET /api/users/{id}` | E-mail et rôle du destinataire |
 
-### Sécurité
-- Authentification via **Keycloak** (JWT) ; le champ `sub` est stocké dans `User.keycloakId`.
-- Validation du jeton à la Gateway → **401** si absent/invalide.
-- Autorisation par méthode (`@PreAuthorize`) dans chaque service → **403** si rôle insuffisant. Un apprenant ne lit que ses propres données.
-- OpenFeign propage le jeton ; pour les traitements déclenchés par événement, un **compte de service** Keycloak (client credentials) est utilisé.
+### 4.2 Communications asynchrones — RabbitMQ (exchange topic `oral.events`)
 
-### Routage de la Gateway
-
-| Préfixes | Service cible |
-|---|---|
-| `/api/users/**`, `/api/establishments/**`, `/api/groups/**` | `USER-SERVICE` (service commun) |
-| `/api/notifications/**` | `NOTIFICATION-SERVICE` |
-| `/api/certifications/**`, `/api/subjects/**`, `/api/grids/**`, `/api/paths/**`, `/api/exercises/**` | `CONTENT-SERVICE` |
-| `/api/recordings/**` | `RECORDING-SERVICE` |
-| `/api/simulations/**` | `SIMULATION-SERVICE` |
-| `/api/feedbacks/**`, `/api/recommendations/**` | `FEEDBACK-SERVICE` |
-| `/api/progress/**`, `/api/alerts/**`, `/api/attestations/**` | `PROGRESS-SERVICE` |
-| `/api/analyses/**` | `ANALYSIS-SERVICE` |
-
----
-
-## 3. Technologies
-
-| Domaine | Technologie |
-|---|---|
-| Microservices | Spring Boot (Java 17+), Spring Web, Spring Data JPA |
-| Documentation API | Swagger / OpenAPI (springdoc) — `/swagger-ui.html` sur chaque service |
-| Gateway / Découverte | Spring Cloud Gateway, Eureka (Spring Cloud Netflix) |
-| Communication | OpenFeign (sync), RabbitMQ / Spring AMQP (async — choix à confirmer en séance 7, Kafka en alternative) |
-| Sécurité | Keycloak, OAuth2 / OpenID Connect, JWT |
-| Bases de données | H2, MySQL, MongoDB |
-| Conteneurisation | Docker, Docker Compose |
-| Front-end | Angular, keycloak-js |
-| Moteur vocal | Whisper ou Vosk (transcription) ; Praat/Parselmouth (prosodie) |
-| Gestion de projet | Git / GitHub, GitHub Projects |
-
----
-
-## 4. Les microservices
-
-| MS | Service | Responsable | Port | Base | Responsabilités |
-|---|---|---|---|---|---|
-| 1 | `user-service` | Groupe (commun) | 8081 | H2 | Gestion commune des utilisateurs et intégration avec Keycloak |
-| 2 | `content-service` | Étudiant 1 | 8082 | H2 | Certifications, banque de sujets, grilles CECRL, parcours, exercices |
-| 3 | `recording-service` | Étudiant 2 | 8083 | H2 | Upload/stockage audio, transcription, événement `RecordingTranscribed` |
-| 4 | `simulation-service` | Étudiant 3 | 8084 | MySQL | Épreuves blanches en 3 étapes, relances, note estimée |
-| 5 | `feedback-service` | Étudiant 4 | 8085 | MySQL | Corrections grammaire/lexique/cohérence, recommandations, validation formateur |
-| 6 | `progress-service` | Étudiant 5 | 8086 | MySQL | Progression, niveau estimé, tableau de bord, alertes, attestations |
-| 7 | `notification-service` | Étudiant 6 | 8088 | MySQL | Création et gestion des notifications destinées aux apprenants et formateurs |
-| 8 | `analysis-service` | Groupe | 8087 | MongoDB | Analyse acoustique (prononciation, fluidité, intonation, pauses, courbe de hauteur) |
-
-### Principes de découpage
-- Un service = une responsabilité métier = **une base** (aucune base partagée).
-- **Pas de jointure entre services** : seuls les identifiants (`userId`, `recordingId`, …) sont stockés.
-- **Aucune dépendance circulaire** : `user-service` (service commun) et `content-service` sont des services de référence qui n'appellent personne.
-- Le calcul est séparé de la restitution (analysis → audio, feedback → texte, progress → agrégation).
-
-### Choix des bases
-
-| Base | Services | Justification |
-|---|---|---|
-| H2 | user, content, recording | Données de référence / métadonnées, schéma simple |
-| MySQL | simulation, feedback, progress, notification | Données relationnelles et transactionnelles, historique et gestion des notifications |
-| MongoDB | analysis | Résultat d'analyse = document à structure variable, lu en un bloc |
-
----
-
-## 5. Communications entre services
-
-### Synchrones (OpenFeign)
-
-| Appelant | Appelé | Endpoint | Objet |
+| Événement | Publié par | Consommé par | Effet |
 |---|---|---|---|
-| simulation-service | user-service | `GET /api/users/{id}/goal` | Niveau et certification visés |
-| simulation-service | content-service | `GET /api/subjects/random`, `GET /api/grids` | Sujet et grille |
-| feedback-service | recording-service | `GET /api/recordings/{id}/transcript` | Texte à corriger |
-| feedback-service | content-service | `GET /api/exercises`, `GET /api/grids` | Exercices et critères |
-| analysis-service | recording-service | `GET /api/recordings/{id}/audio` | Audio à analyser |
-| progress-service | user-service | `GET /api/users/{id}/goal`, `GET /api/groups/{id}/members` | Cible et membres |
-| progress-service | content-service | `GET /api/certifications/{id}` | Niveau requis |
-
-### Asynchrones (RabbitMQ)
-
-| Événement | Clé de routage | Producteur | Consommateurs |
-|---|---|---|---|
-| `RecordingTranscribed` | `recording.transcribed` | recording | analysis, simulation |
-| `AnalysisCompleted` | `analysis.completed` | analysis | feedback |
-| `FeedbackGenerated` | `feedback.generated` | feedback | progress, simulation |
-| `FeedbackValidated` | `feedback.validated` | feedback | progress, simulation |
-| `SimulationFinished` | `simulation.finished` | simulation | progress, notification |
-
-## 6. Conventions REST
-
-| Sujet | Convention |
-|---|---|
-| Format | JSON UTF-8, dates ISO 8601, préfixe `/api`, ressources au pluriel |
-| Pagination | `page` (à partir de 0) et `size` ; réponse : `content`, `page`, `size`, `totalElements` |
-| Succès | `200` lecture/màj · `201` création (en-tête `Location`) · `202` traitement async accepté · `204` suppression |
-| Erreurs | `400` · `401` · `403` · `404` · `409` (conflit d'état) · `413` · `415` · `503` |
-| Format d'erreur | RFC 7807 (`ProblemDetail`) : `type`, `title`, `status`, `detail`, `instance` |
-| Documentation | Swagger UI par service ; contrats OpenAPI exportés dans `Documentation/` |
+| `recording.analysed` | `recording` | `feedback`, `notification` | Déclenche la génération du feedback ; prévient l'apprenant |
+| `recording.failed` | `recording` | `notification` | Alerte l'apprenant et l'administrateur ; relance proposée |
+| `feedback.generated` | `feedback` | `simulation`, `progress`, `notification` | Note estimée, point d'historique, notification apprenant |
+| `feedback.validated` | `feedback` | `progress`, `notification` | Mise à jour du point d'historique après validation/ajustement formateur |
+| `simulation.completed` | `simulation` | `progress`, `notification` | Note globale d'examen blanc et notification de fin d'épreuve |
+| `progress.alert.raised` | `progress` | `notification` | Alerte au formateur (apprenant en difficulté) |
+| `attestation.issued` | `progress` | `notification` | Attestation disponible pour l'apprenant |
+| `class.path.assigned` | `classroom` | `notification` | Notification du nouveau parcours aux apprenants de la classe |
+| `trainer.comment.added` | `classroom` | `notification` | Notification d'un commentaire formateur à l'apprenant |
+| `user.registered` | `user` | `notification` | Message de bienvenue |
 
 ---
 
-## 7. Structure du dépôt
+## 5. Structure du dépôt
 
-```
+```text
 oraltrainer-4ssa6-g11/
 ├── Backend/
-│   ├── api-gateway/
-│   ├── eureka-server/
-│   ├── user-service/           # service commun lié à Keycloak
-│   ├── content-service/
-│   ├── recording-service/
-│   ├── simulation-service/
-│   ├── feedback-service/
-│   ├── progress-service/
-│   ├── notification-service/
-│   ├── analysis-service/
-│   ├── events-contract/        # classes d'événements partagées
-│   ├── speech-engine/          # conteneur du moteur vocal
-│   └── docker-compose.yml
+│   ├── api-gateway/            # Spring Cloud Gateway (:8080 / local :8090)
+│   ├── eureka-server/          # Spring Cloud Netflix Eureka (:8761)
+│   ├── config-server/          # Spring Cloud Config (:8888)
+│   ├── user-service/           # Service commun Spring Boot (:8081)
+│   ├── content-service/        # Beha Eddine Cherif (:8082)
+│   ├── recording-service/      # Ala Salem (:8083 — audio + transcription + analyse vocale)
+│   ├── simulation-service/     # Yessmine Aissa Larousse (:8084)
+│   ├── feedback-service/       # Feriel Dridi (:8085)
+│   ├── progress-service/       # Ahmed Chaabeni (:8086)
+│   ├── notification-service/   # Service commun Node.js / NestJS (:8088)
+│   ├── classroom-service/      # Med Hedi Guidara (:8089)
+│   ├── events-contract/        # Enveloppe et contrats d'événements partagés
+│   └── speech-engine/          # Conteneur Whisper/Vosk + Praat/Parselmouth
 ├── Frontend/
-│   └── web/
+│   └── web/                    # SPA Web
 ├── Documentation/
-│   ├── Presentation/
 │   ├── Diagrams/
+│   ├── Presentation/
+│   ├── OralTrain_Dossier_Conception_v2.pdf
+│   ├── OralTrain.odt
 │   ├── Document_Conception_Plateforme_Oral.docx
 │   └── Document_Conception_Plateforme_Oral_Groupe.docx
 └── README.md

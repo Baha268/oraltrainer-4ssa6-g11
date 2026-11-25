@@ -16,13 +16,13 @@ public class OpenApiConfig {
     public OpenAPI userServiceOpenAPI() {
         return new OpenAPI()
                 .info(new Info()
-                        .title("OralTrainer - User Service API")
-                        .version("1.0.0")
-                        .description("Microservice dédié à la gestion des utilisateurs, profils, rôles et groupes au sein de la plateforme OralTrainer. "
-                                + "Il centralise l'identité des apprenants et encadrants, la gestion des autorisations et l'organisation des cohortes.")
+                        .title("OralTrain - User Service API")
+                        .version("2.0.0")
+                        .description("Service commun dédié à la gestion des profils utilisateurs, des rôles applicatifs (APPRENANT, FORMATEUR, ADMIN_ETABLISSEMENT, ADMIN) "
+                                + "et du lien avec l'identité Keycloak (keycloakId) ; publie l'événement user.registered.")
                         .contact(new Contact()
-                                .name("OralTrainer Team (G11)")
-                                .email("contact@oraltrainer.local")
+                                .name("OralTrain Team (4SSA6-G1)")
+                                .email("contact@oraltrain.local")
                                 .url("https://github.com/Baha268/oraltrainer-4ssa6-g11")))
                 .servers(List.of(
                         new Server()

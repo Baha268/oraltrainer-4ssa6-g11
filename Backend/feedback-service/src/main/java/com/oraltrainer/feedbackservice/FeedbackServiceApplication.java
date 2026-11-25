@@ -1,4 +1,4 @@
-﻿package com.oraltrainer.feedbackservice;
+package com.oraltrainer.feedbackservice;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
