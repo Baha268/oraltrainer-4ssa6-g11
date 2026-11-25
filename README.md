@@ -152,9 +152,7 @@ oraltrainer-4ssa6-g11/
 │   ├── feedback-service/       # Feriel Dridi (:8085)
 │   ├── progress-service/       # Ahmed Chaabeni (:8086)
 │   ├── notification-service/   # Service commun Node.js / NestJS (:8088)
-│   ├── classroom-service/      # Med Hedi Guidara (:8089)
-│   ├── events-contract/        # Enveloppe et contrats d'événements partagés
-│   └── speech-engine/          # Conteneur Whisper/Vosk + Praat/Parselmouth
+│   └── classroom-service/      # Med Hedi Guidara (:8089)
 ├── Frontend/
 │   └── web/                    # SPA Web
 ├── Documentation/
