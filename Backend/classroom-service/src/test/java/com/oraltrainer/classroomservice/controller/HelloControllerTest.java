@@ -1,4 +1,4 @@
-package com.oraltrainer.notificationservice.controller;
+package com.oraltrainer.classroomservice.controller;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +11,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest
+@SpringBootTest(properties = {"eureka.client.enabled=false"})
 @AutoConfigureMockMvc
 class HelloControllerTest {
 
@@ -20,10 +20,10 @@ class HelloControllerTest {
 
     @Test
     void shouldReturnHelloResponse() throws Exception {
-        mockMvc.perform(get("/api/notification/hello"))
+        mockMvc.perform(get("/api/classroom/hello"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.message").value("Hello from notification-service!"))
-                .andExpect(jsonPath("$.service").value("notification-service"))
+                .andExpect(jsonPath("$.message").value("Hello from classroom-service!"))
+                .andExpect(jsonPath("$.service").value("classroom-service"))
                 .andExpect(jsonPath("$.status").value("UP"))
                 .andExpect(jsonPath("$.timestamp").isNotEmpty());
     }
@@ -32,10 +32,10 @@ class HelloControllerTest {
     void shouldExposeOpenApiDocsAndSwaggerUi() throws Exception {
         mockMvc.perform(get("/v3/api-docs"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.info.title").value("OralTrainer - Notification Service API"))
-                .andExpect(jsonPath("$.info.version").value("1.0.0"))
-                .andExpect(jsonPath("$.info.description", containsString("notifications")))
-                .andExpect(jsonPath("$.paths['/api/notification/hello'].get").exists());
+                .andExpect(jsonPath("$.info.title").value("OralTrain - Classroom Service API"))
+                .andExpect(jsonPath("$.info.version").value("2.0.0"))
+                .andExpect(jsonPath("$.info.description", containsString("classes")))
+                .andExpect(jsonPath("$.paths['/api/classroom/hello'].get").exists());
 
         mockMvc.perform(get("/swagger-ui/index.html"))
                 .andExpect(status().isOk());

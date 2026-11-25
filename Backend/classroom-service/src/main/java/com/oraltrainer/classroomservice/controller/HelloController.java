@@ -1,4 +1,4 @@
-package com.oraltrainer.notificationservice.controller;
+package com.oraltrainer.classroomservice.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -12,15 +12,15 @@ import java.time.Instant;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/notification")
-@Tag(name = "Notification Service Hello", description = "Endpoint de test et de vérification de disponibilité pour notification-service")
+@RequestMapping("/api/classroom")
+@Tag(name = "Classroom Service Hello", description = "Endpoint de test et de vérification de disponibilité pour classroom-service")
 public class HelloController {
 
-    private static final String SERVICE_NAME = "notification-service";
+    private static final String SERVICE_NAME = "classroom-service";
 
     @GetMapping("/hello")
     @Operation(
-            summary = "Hello notification-service",
+            summary = "Hello classroom-service",
             description = "Retourne un message de bienvenue, le nom du service, son statut et l'horodatage courant."
     )
     @ApiResponse(responseCode = "200", description = "Réponse retournée avec succès")
