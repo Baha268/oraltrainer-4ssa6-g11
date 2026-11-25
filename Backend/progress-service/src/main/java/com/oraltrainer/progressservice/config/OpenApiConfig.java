@@ -16,13 +16,13 @@ public class OpenApiConfig {
     public OpenAPI progressServiceOpenAPI() {
         return new OpenAPI()
                 .info(new Info()
-                        .title("OralTrainer - Progress Service API")
-                        .version("1.0.0")
-                        .description("Microservice dédié au suivi de progression des apprenants, à l'alimentation des tableaux de bord et à la délivrance des attestations. "
-                                + "Il agrège les indicateurs de maîtrise orale et les jalons atteints au fil des entraînements.")
+                        .title("OralTrain - Progress Service API")
+                        .version("2.0.0")
+                        .description("Carnet de suivi de l'apprenant : historique par compétence et niveau CECRL, tendances, objectifs, "
+                                + "alertes de progression (stagnation, baisse, inactivité), délivrance d'attestations et recommandations d'exercices.")
                         .contact(new Contact()
-                                .name("OralTrainer Team (G11)")
-                                .email("contact@oraltrainer.local")
+                                .name("OralTrain Team (4SSA6-G1)")
+                                .email("contact@oraltrain.local")
                                 .url("https://github.com/Baha268/oraltrainer-4ssa6-g11")))
                 .servers(List.of(
                         new Server()
