@@ -11,7 +11,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest
+@SpringBootTest(properties = {"eureka.client.enabled=false"})
 @AutoConfigureMockMvc
 class HelloControllerTest {
 
@@ -32,9 +32,9 @@ class HelloControllerTest {
     void shouldExposeOpenApiDocsAndSwaggerUi() throws Exception {
         mockMvc.perform(get("/v3/api-docs"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.info.title").value("OralTrainer - Feedback Service API"))
-                .andExpect(jsonPath("$.info.version").value("1.0.0"))
-                .andExpect(jsonPath("$.info.description", containsString("retours pédagogiques")))
+                .andExpect(jsonPath("$.info.title").value("OralTrain - Feedback Service API"))
+                .andExpect(jsonPath("$.info.version").value("2.0.0"))
+                .andExpect(jsonPath("$.info.description", containsString("retour pédagogique")))
                 .andExpect(jsonPath("$.paths['/api/feedback/hello'].get").exists());
 
         mockMvc.perform(get("/swagger-ui/index.html"))
