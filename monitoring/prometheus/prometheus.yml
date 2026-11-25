@@ -1,0 +1,27 @@
+global:
+  scrape_interval: 5s
+  evaluation_interval: 5s
+
+scrape_configs:
+  - job_name: 'eureka-server'
+    metrics_path: '/actuator/prometheus'
+    honor_labels: true
+    static_configs:
+      - targets: ['host.docker.internal:8761']
+        labels:
+          application: 'eureka-server'
+
+  - job_name: 'oraltrain-microservices-eureka'
+    metrics_path: '/actuator/prometheus'
+    honor_labels: true
+    eureka_sd_configs:
+      - server: 'http://host.docker.internal:8761/eureka'
+        refresh_interval: 10s
+    relabel_configs:
+      - source_labels: [__meta_eureka_app_name]
+        action: lowercase
+        target_label: application
+      - source_labels: [__address__]
+        regex: '.*:([0-9]+)'
+        replacement: 'host.docker.internal:${1}'
+        target_label: __address__
