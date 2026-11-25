@@ -16,13 +16,13 @@ public class OpenApiConfig {
     public OpenAPI recordingServiceOpenAPI() {
         return new OpenAPI()
                 .info(new Info()
-                        .title("OralTrainer - Recording Service API")
-                        .version("1.0.0")
-                        .description("Microservice dédié à la gestion des enregistrements audio et de leurs transcriptions au sein d'OralTrainer. "
-                                + "Il orchestre la réception des flux vocaux, le suivi des métadonnées audio et la mise à disposition des transcriptions.")
+                        .title("OralTrain - Recording Service API")
+                        .version("2.0.0")
+                        .description("Point d'entrée des productions orales : enregistrement et stockage audio (MongoDB GridFS), transcription (Whisper / Vosk) "
+                                + "et analyse vocale prosodique (débit, pauses, hauteur, prononciation, fluidité, intonation) via speech-engine, avec relance après échec.")
                         .contact(new Contact()
-                                .name("OralTrainer Team (G11)")
-                                .email("contact@oraltrainer.local")
+                                .name("OralTrain Team (4SSA6-G1)")
+                                .email("contact@oraltrain.local")
                                 .url("https://github.com/Baha268/oraltrainer-4ssa6-g11")))
                 .servers(List.of(
                         new Server()
