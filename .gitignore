@@ -11,6 +11,7 @@
 **/dist/
 
 # Logs & crash dumps
+logs/
 *.log
 hs_err_pid*
 replay_pid*
